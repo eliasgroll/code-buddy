@@ -4,11 +4,7 @@ const fs = require('fs');
 const fetch = require('cross-fetch');
 const path = require('path');
 const {exec} = require('child_process');
-
-const ENDPOINT = 'https://api.openai.com';
-const API_KEY = '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';
-
-const LANGUAGE = 'vanilla javascript and html';
+const config = require('./config.json');
 
 const EXCLUDE_DIRS = [
     'node_modules', // Node.js modules
@@ -82,15 +78,15 @@ const buildReq = (prompt, files) => {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${API_KEY}`
+            'Authorization': `Bearer ${config.apiKey}`
         },
         body: JSON.stringify({
-            model: "gpt-3.5-turbo",
+            model: config.model,
             messages: [
 
                 {
                     "role": "system",
-                    "content": `You are a code modification assistant. Your task is to help users by suggesting modifications and comments to the ${LANGUAGE} code files they provide based on the instructions given in the user_request. Please maintain the original functionality of the code as much as possible and make clear if a request cannot be fulfilled. Always finish your code, never provide todos. You are allowed to specify new files if the user did not provide any`
+                    "content": `You are a code modification assistant. Your task is to help users by suggesting modifications and comments to the ${config.language} code files they provide based on the instructions given in the user_request. Please maintain the original functionality of the code as much as possible and make clear if a request cannot be fulfilled. Always finish your code, never provide todos. You are allowed to specify new files if the user did not provide any`
                 },
                 {
                     "role": "user",
@@ -144,7 +140,7 @@ const gitCommit = (message, callback) => {
 
 const code = json => Object.entries(json).map(e => `File path: ${e[0]}\n\n File content: \n${e[1]}\n`).join('\n\n\n');
 
-const callApi = (prompt) => fetch(new URL('/v1/chat/completions', ENDPOINT), buildReq(prompt))
+const callApi = (prompt) => fetch(new URL('/v1/chat/completions', config.endpoint), buildReq(prompt))
     .then(response => response.json())
 
 const [nodePath, scriptPath, ...modificationPrompt] = process.argv;
@@ -161,22 +157,8 @@ const logInPlace = (message) => {
 }
 
 const extractJSON = (str) => {
-    try {
-        const startIndex = str.indexOf('{');
-        const endIndex = str.lastIndexOf('}') + 1;
-
-        if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-            const jsonString = str.substring(startIndex, endIndex);
-            const jsonObject = JSON.parse(jsonString);
-            return jsonObject;
-        } else {
-            logInPlace("No JSON object found in the input string.");
-            return null;
-        }
-    } catch (e) {
-        logInPlace("Failed to parse JSON object from the input string due to:", e);
-        return null;
-    }
+    const jsonString = str.substring(str.indexOf('{'), str.lastIndexOf('}') + 1);
+    return jsonString && JSON.parse(jsonString);
 }
 
 
@@ -184,26 +166,16 @@ let timer = 0;
 let interval;
 
 const run = async () => {
-    abortIfUncommited();
+    config.git && abortIfUncommited();
     const files = await getFiles('.', EXCLUDE_DIRS);
 
-    if (!interval) {
-        interval = setInterval(() => {
-            timer++
-            logInPlace(`Writing your code...(${timer}s elapsed)`);
-        }, 1000);
-        logInPlace(`Writing your code...(0s elapsed)`);
-    }
+    interval ||= setInterval(() => logInPlace(`Writing your code...(${++timer}s elapsed)`), 1000);
+
     const r = await callApi(modificationPrompt.join(' '), files);
     const mod = r.choices.map(choice => choice.message.content).join('');
 
-    const json = extractJSON(mod);
-    if (!json) {
-        run();
-        return;
-    }
-
     try {
+        const json = extractJSON(mod);
         writeFiles(json);
     } catch (e) {
         logInPlace(e);
@@ -211,7 +183,7 @@ const run = async () => {
         return;
     }
     clearInterval(interval);
-    gitCommit(modificationPrompt.join(' '), logInPlace);
+    config.git && gitCommit(modificationPrompt.join(' '), logInPlace);
 }
 
 void run();

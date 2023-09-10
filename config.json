@@ -1,0 +1,7 @@
+{
+  "endpoint": "https://api.openai.com",
+  "apiKey": "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",
+  "model": "chatgpt-3.5-turbo",
+  "language": "vanilla javascript and html",
+  "git": true
+}
