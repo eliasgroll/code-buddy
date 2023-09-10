@@ -3,5 +3,5 @@
   "apiKey": "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",
   "model": "gpt-3.5-turbo",
   "language": "vanilla javascript and html",
-  "git": false
+  "git": true
 }
