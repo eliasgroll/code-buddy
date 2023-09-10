@@ -1,0 +1,24 @@
+{
+  "name": "code-buddy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": "./index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eliasgroll/code-buddy.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eliasgroll/code-buddy/issues"
+  },
+  "homepage": "https://github.com/eliasgroll/code-buddy#readme",
+  "dependencies": {
+    "cross-fetch": "^4.0.0",
+    "zx": "^7.2.3"
+  }
+}
