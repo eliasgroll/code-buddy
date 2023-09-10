@@ -59,21 +59,20 @@ const getFiles = async (dir, ignoreDirs = []) => {
 
 const abortIfUncommited = () => exec('git status --porcelain', (err, stdout, stderr) => {
     if (err) {
-        console.error('Failed to execute git command', err);
+        logInPlace('Failed to execute git command', err);
         return;
     }
 
     if (stderr) {
-        console.error('Git error:', stderr);
+        logInPlace('Git error:', stderr);
         return;
     }
 
     if (stdout) {
-        console.error('There are uncommitted changes in the working directory. Aborting...');
+        logInPlace('There are uncommitted changes in the working directory. Aborting...');
         process.exit(1);
     } else {
-        console.log('No uncommitted changes detected. Continuing...');
-        // Continue with the rest of your script
+        logInPlace('No uncommitted changes detected. Continuing...');
     }
 });
 const buildReq = (prompt, files) => {
@@ -129,22 +128,19 @@ const writeFiles = (data) => {
 const gitCommit = (message, callback) => {
     exec(`git add . && git commit -m "${message}"`, (error, stdout, stderr) => {
         if (error) {
-            console.error(`Execution error: ${error}`);
+            logInPlace(`Execution error: ${error}`);
             return callback(error, null);
         }
-
-        console.log(`stdout: ${stdout}`);
-        console.error(`stderr: ${stderr}`);
-
+        if (stderr) {
+            logInPlace(`Git error: ${stderr}`);
+            return callback(error, null);
+        }
         callback(null, stdout);
     });
 }
 
 
 const code = json => Object.entries(json).map(e => `File path: ${e[0]}\n\n File content: \n${e[1]}\n`).join('\n\n\n');
-
-const buildPrompt = (prompt, json) => `I have the following files in my working directory: ${code(json)} please modify this f
-)}`;
 
 const callApi = (prompt) => fetch(new URL('/v1/chat/completions', ENDPOINT), buildReq(prompt))
     .then(response => response.json())
@@ -213,7 +209,7 @@ const run = async () => {
         return;
     }
     clearInterval(interval);
-    gitCommit(modificationPrompt.join(' '), console.log);
+    gitCommit(modificationPrompt.join(' '), logInPlace);
 }
 
 void run();
