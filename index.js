@@ -1,12 +1,14 @@
+#! /usr/bin/env node
+
 const fs = require('fs');
 const fetch = require('cross-fetch');
 const path = require('path');
 const {exec} = require('child_process');
 
-const ENDPOINT = 'https://43882-3000.2.codesphere.com/';
-const API_KEY = '';
+const ENDPOINT = 'https://api.openai.com';
+const API_KEY = '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';
 
-const LANGUAGE = 'javascript';
+const LANGUAGE = 'vanilla javascript and html';
 
 const EXCLUDE_DIRS = [
     'node_modules', // Node.js modules
@@ -83,7 +85,7 @@ const buildReq = (prompt, files) => {
             'Authorization': `Bearer ${API_KEY}`
         },
         body: JSON.stringify({
-            //model: "gpt-3.5-turbo",
+            model: "gpt-3.5-turbo",
             messages: [
 
                 {
@@ -148,7 +150,7 @@ const callApi = (prompt) => fetch(new URL('/v1/chat/completions', ENDPOINT), bui
 const [nodePath, scriptPath, ...modificationPrompt] = process.argv;
 
 if (modificationPrompt.length === 0) {
-    console.error('Usage: cb <path_to_file> <modification_prompt>');
+    console.error('Usage: codebuddy <modification_prompt>');
     process.exit(1);
 }
 
