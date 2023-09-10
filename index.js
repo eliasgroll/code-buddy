@@ -178,7 +178,7 @@ const run = async () => {
         const json = extractJSON(mod);
         writeFiles(json);
     } catch (e) {
-        logInPlace(e);
+        logInPlace(toString(e));
         run();
         return;
     }
