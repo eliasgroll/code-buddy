@@ -124,7 +124,7 @@ const writeFiles = (data) => {
 }
 
 const gitCommit = (message, callback) => {
-    exec(`git add . && git commit -m "${message}"`, (error, stdout, stderr) => {
+    exec(`git add --all && git commit -m "${message}"`, (error, stdout, stderr) => {
         if (error) {
             logInPlace(`Execution error: ${error}`);
             return callback(error, null);
@@ -183,6 +183,8 @@ const run = async () => {
         return;
     }
     clearInterval(interval);
+    logInPlace(`Your code is ready!${config.git ? ' Committing...' : ''}`);
+    await new Promise(r => setTimeout(r, 1000));
     config.git && gitCommit(modificationPrompt.join(' '), logInPlace);
 }
 
