@@ -133,7 +133,7 @@ const gitCommit = (message, callback) => {
             logInPlace(`Git error: ${stderr}`);
             return callback(error, null);
         }
-        callback(null, stdout);
+        callback(error ?? stdout);
     });
 }
 

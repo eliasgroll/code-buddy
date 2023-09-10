@@ -1,7 +1,7 @@
 {
-  "endpoint": "https://api.openai.com",
-  "apiKey": "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",
-  "model": "gpt-3.5-turbo",
+  "endpoint": "https://43882-3000.2.codesphere.com/",
+  "apiKey": "",
+  "model": "/home/user/app/models/codellama-7b-instruct.Q5_K_M.gguf",
   "language": "vanilla javascript and html",
   "git": true
 }
